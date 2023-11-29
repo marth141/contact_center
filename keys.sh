@@ -1,0 +1,8 @@
+#!/bin/bash
+export TWILIO_ACCOUNT_SID=
+export TWILIO_AUTH_TOKEN=
+export TWILIO_WORKSPACE_SID=
+export TWIML_DIALER_APP_SID=
+export TWIML_QUEUE_APP_SID=
+export NGROK=
+export TWILIO_PHONE_NUMBER=+1
