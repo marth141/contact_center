@@ -1,6 +1,7 @@
 defmodule ContactCenterWeb.PageLive.Index do
   alias ContactCenter.Queue
   use ContactCenterWeb, :live_view
+  import ContactCenterWeb.PageLive.DialerForm
 
   @impl true
   def mount(_params, _session, socket) do
@@ -25,8 +26,13 @@ defmodule ContactCenterWeb.PageLive.Index do
 
   @impl true
   def handle_event("validate", params, socket) do
-    IO.inspect(params)
     socket = assign(socket, :number, params["number"])
+    {:noreply, socket}
+  end
+
+  def handle_event("dial_button_press", params, socket) do
+    number = socket.assigns.number
+    socket = assign(socket, :number, number <> params["value"])
     {:noreply, socket}
   end
 

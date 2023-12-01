@@ -18,7 +18,8 @@ defmodule ContactCenter.Application do
       # {ContactCenter.Worker, arg},
       # Start to serve requests, typically the last entry
       ContactCenterWeb.Endpoint,
-      {ContactCenter.Queue, friendly_name: "support"}
+      {ContactCenter.Queue, [friendly_name: "support"]},
+      {ContactCenter.CallLogger, []}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

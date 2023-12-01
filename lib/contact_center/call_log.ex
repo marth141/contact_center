@@ -33,14 +33,10 @@ defmodule ContactCenter.CallLog do
   end
 
   def changeset(call_log, params \\ %{}) do
-    keys = get_param_atoms(params)
+    keys = __MODULE__.__schema__(:fields) |> Enum.reject(& &1 == :id)
 
     call_log
     |> cast(params, keys)
     |> unique_constraint(:sid)
-  end
-
-  defp get_param_atoms(params) do
-    Map.keys(params) |> Enum.map(&String.to_atom/1)
   end
 end

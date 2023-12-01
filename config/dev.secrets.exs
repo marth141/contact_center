@@ -3,7 +3,8 @@ import Config
 # Configures Twilio in apps/phone
 config :ex_twilio,
   # optional
-  # workspace_sid: System.fetch_env!("TWILIO_WORKSPACE_SID"),
+  workspace_sid: System.get_env("TWILIO_WORKSPACE_SID"),
+  # required
   account_sid: System.get_env("TWILIO_ACCOUNT_SID"),
   auth_token: System.get_env("TWILIO_AUTH_TOKEN")
 

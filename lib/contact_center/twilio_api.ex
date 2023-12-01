@@ -11,47 +11,47 @@ defmodule TwilioApi do
   end
 
   def get_call_resource_list() do
-    %{body: body} = Finch.build(
-      :get,
-      "https://api.twilio.com/2010-04-01/Accounts/#{account_sid()}/Calls.json?PageSize=20",
-      [
-        {"Authorization", "Basic #{auth_base64()}"}
-      ]
-    )
-    |> Finch.request!(ContactCenter.Finch)
+    %{body: body} =
+      Finch.build(
+        :get,
+        "https://api.twilio.com/2010-04-01/Accounts/#{account_sid()}/Calls.json?PageSize=20",
+        [
+          {"Authorization", "Basic #{auth_base64()}"}
+        ]
+      )
+      |> Finch.request!(ContactCenter.Finch)
+
     Jason.decode!(body)
   end
 
   def read_multiple_queue_resources() do
-    with {:ok, %{body: body, status: 200}} <-
-           Finch.build(
-             :get,
-             "https://api.twilio.com/2010-04-01/Accounts/#{account_sid()}/Queues.json?PageSize=20",
-             [
-               {"Authorization",
-                "Basic #{auth_base64()}"}
-             ]
-           )
-           |> Finch.request(ContactCenter.Finch),
-         {:ok, queues} <- Jason.decode(body) do
-      queues
-    end
+    {:ok, %{body: body}} =
+      Finch.build(
+        :get,
+        "https://api.twilio.com/2010-04-01/Accounts/#{account_sid()}/Queues.json?PageSize=20",
+        [
+          {"Authorization", "Basic #{auth_base64()}"}
+        ]
+      )
+      |> Finch.request(ContactCenter.Finch)
+
+    {:ok, queues} = Jason.decode(body)
+    queues
   end
 
   def read_multiple_member_resources(queue_sid) do
-    with {:ok, %{body: body, status: 200}} <-
-           Finch.build(
-             :get,
-             "https://api.twilio.com/2010-04-01/Accounts/#{account_sid()}/Queues/#{queue_sid}/Members.json",
-             [
-               {"Authorization",
-                "Basic #{auth_base64()}"}
-             ]
-           )
-           |> Finch.request(ContactCenter.Finch),
-         {:ok, queues} <- Jason.decode(body) do
-      queues
-    end
+    {:ok, %{body: body}} =
+      Finch.build(
+        :get,
+        "https://api.twilio.com/2010-04-01/Accounts/#{account_sid()}/Queues/#{queue_sid}/Members.json",
+        [
+          {"Authorization", "Basic #{auth_base64()}"}
+        ]
+      )
+      |> Finch.request(ContactCenter.Finch)
+
+    {:ok, queues} = Jason.decode(body)
+    queues
   end
 
   def create_sink() do

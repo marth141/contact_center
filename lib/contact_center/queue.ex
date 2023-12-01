@@ -2,7 +2,6 @@ defmodule ContactCenter.Queue do
   @moduledoc """
   This is for setting up a queue for calls.
   """
-
   use GenServer, restart: :temporary
 
   @doc """
@@ -37,7 +36,11 @@ defmodule ContactCenter.Queue do
     Process.send_after(self(), :refresh_twilio_queue_status, :timer.seconds(seconds))
   end
 
-  # GenServer Built-in Stuff
+  defp get_env() do
+    Application.get_env(:contact_center, :env)
+  end
+
+  # GenServer Functions and Callbacks
   def start_link(friendly_name: friendly_name) do
     GenServer.start_link(__MODULE__, [friendly_name: friendly_name], name: __MODULE__)
   end
@@ -49,9 +52,32 @@ defmodule ContactCenter.Queue do
 
   @impl true
   def handle_continue(:init, friendly_name: friendly_name) do
-    state = Phone.get_twilio_queue_status_by_name(friendly_name)
-    schedule_poll(6)
-    {:noreply, state}
+    case get_env() do
+      :test ->
+        {:noreply,
+         %{
+           "account_sid" => "",
+           "average_wait_time" => 0,
+           "current_size" => 0,
+           "date_created" => "Wed, 01 Mar 2023 06:03:43 +0000",
+           "date_updated" => "Wed, 01 Mar 2023 06:03:43 +0000",
+           "friendly_name" => "support",
+           "max_size" => 100,
+           "sid" => "",
+           "subresource_uris" => %{
+             "members" =>
+               ""
+           },
+           "uri" =>
+             ""
+         }
+        }
+
+      _ ->
+        state = Phone.get_twilio_queue_status_by_name(friendly_name)
+        schedule_poll(6)
+        {:noreply, state}
+    end
   end
 
   @impl true

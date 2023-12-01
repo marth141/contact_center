@@ -5,34 +5,45 @@ defmodule ContactCenter.CallLogger do
   Returns the state of the call logger
   """
   def read() do
-    [{pid, _}] = Registry.lookup(Phone.MyRegistry, "call_logger")
-    GenServer.call(pid, :read)
-  end
-
-  def refresh() do
-    [{pid, _}] = Registry.lookup(Phone.MyRegistry, "call_logger")
-    GenServer.call(pid, :refresh_call_logs)
+    GenServer.call(__MODULE__, :read)
   end
 
   @doc """
-  Starts call logger GenServer
+  Refreshes the call logger.
   """
-  def start_call_logger() do
-    name = {:via, Registry, {Phone.MyRegistry, "call_logger", []}}
-
-    DynamicSupervisor.start_child(
-      Phone.MyDynamicSupervisor,
-      {__MODULE__, [name: name, status: []]}
-    )
+  def refresh() do
+    GenServer.call(__MODULE__, :refresh_call_logs)
   end
 
-  def schedule_poll(seconds \\ 300) do
+  @doc """
+  Sets the GenServer to repeat the refresh task
+  """
+  def schedule_call_log_refresh(seconds \\ 300) do
     Process.send_after(self(), :refresh_call_logs, :timer.seconds(seconds))
   end
 
-  # GenServer Callbacks
-  def start_link(name: name, status: status) do
-    GenServer.start_link(__MODULE__, status, name: name)
+  defp get_call_log() do
+    with %{"calls" => calls} <- TwilioApi.get_call_resource_list() do
+      calls
+    else
+      %{"status" => 401} -> []
+    end
+  end
+
+  defp insert_call_logs_to_database(call_logs) do
+    Enum.map(call_logs, fn call ->
+      ContactCenter.CallLog.changeset(%ContactCenter.CallLog{}, call)
+    end)
+    |> Enum.map(fn changeset -> ContactCenter.Repo.insert(changeset) end)
+  end
+
+  defp get_env() do
+    Application.get_env(:contact_center, :env)
+  end
+
+  # GenServer Functions and Callbacks
+  def start_link(arguments) do
+    GenServer.start_link(__MODULE__, arguments, name: __MODULE__)
   end
 
   @impl true
@@ -42,8 +53,14 @@ defmodule ContactCenter.CallLogger do
 
   @impl true
   def handle_continue(:init, state) do
-    schedule_poll(10)
-    {:noreply, state}
+    case get_env() do
+      :test ->
+        {:noreply, []}
+
+      _ ->
+        schedule_call_log_refresh(10)
+        {:noreply, state}
+    end
   end
 
   @impl true
@@ -52,7 +69,7 @@ defmodule ContactCenter.CallLogger do
 
     insert_call_logs_to_database(call_logs)
 
-    schedule_poll()
+    schedule_call_log_refresh()
     {:noreply, call_logs}
   end
 
@@ -67,17 +84,5 @@ defmodule ContactCenter.CallLogger do
     insert_call_logs_to_database(call_logs)
 
     {:reply, call_logs, call_logs}
-  end
-
-  defp get_call_log() do
-    TwilioApi.get_call_resource_list()
-    |> Map.get("calls")
-  end
-
-  defp insert_call_logs_to_database(call_logs) do
-    Enum.map(call_logs, fn call ->
-      ContactCenter.CallLog.changeset(%ContactCenter.CallLog{}, call)
-    end)
-    |> Enum.map(fn changeset -> ContactCenter.Repo.insert(changeset) end)
   end
 end

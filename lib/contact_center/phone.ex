@@ -1,28 +1,24 @@
 defmodule Phone do
   @moduledoc """
   This is a top layer API for all of the phone features.
+  Parts of this should probably be redefined into other places.
+  Like an IVR module or something.
   """
   import ExTwiml
 
+  @doc """
+  your ngrok link. Great while testing!
+  """
   def ngrok do
     Application.get_env(:contact_center, :ngrok)
   end
 
+  @doc """
+  Your twilio phone number that you'll want to use for the dialer.
+  This should be made to go off user account in the database.
+  """
   def twilio_phone_number do
     Application.get_env(:contact_center, :twilio_phone_number)
-  end
-
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Phone.hello()
-      :world
-
-  """
-  def hello do
-    :world
   end
 
   @doc """
@@ -52,12 +48,18 @@ defmodule Phone do
   See app.js
   """
   def fetch_dialer_access_token() do
-    ExTwilio.Capability.new()
-    |> ExTwilio.Capability.allow_client_incoming("jenny")
-    |> ExTwilio.Capability.allow_client_outgoing(
-      Application.get_env(:contact_center, :twiml_dialer_app_sid)
-    )
-    |> ExTwilio.Capability.token()
+    twiml_dialer_sid = Application.get_env(:contact_center, :twiml_dialer_app_sid)
+
+    if is_nil(twiml_dialer_sid) do
+      ""
+    else
+      ExTwilio.Capability.new()
+      |> ExTwilio.Capability.allow_client_incoming("jenny")
+      |> ExTwilio.Capability.allow_client_outgoing(
+        Application.get_env(:contact_center, :twiml_dialer_app_sid)
+      )
+      |> ExTwilio.Capability.token()
+    end
   end
 
   @doc """
@@ -65,11 +67,17 @@ defmodule Phone do
   See app.js
   """
   def fetch_queue_access_token() do
-    ExTwilio.Capability.new()
-    |> ExTwilio.Capability.allow_client_outgoing(
-      Application.get_env(:contact_center, :twiml_queue_app_sid)
-    )
-    |> ExTwilio.Capability.token()
+    twiml_queue_app_sid = Application.get_env(:contact_center, :twiml_queue_app_sid)
+
+    if is_nil(twiml_queue_app_sid) do
+      ""
+    else
+      ExTwilio.Capability.new()
+      |> ExTwilio.Capability.allow_client_outgoing(
+        Application.get_env(:contact_center, :twiml_queue_app_sid)
+      )
+      |> ExTwilio.Capability.token()
+    end
   end
 
   @doc """
@@ -95,7 +103,7 @@ defmodule Phone do
   @doc """
   Returns Twiml for an Interactive Voice Response (IVR)
   """
-  def ivr_welcome(conn) do\
+  def ivr_welcome(conn) do
     case conn.body_params["Digits"] do
       "1" ->
         twiml do
@@ -207,8 +215,10 @@ defmodule Phone do
   Gets a Twilio queue by its friendly name from Twilio
   """
   def get_twilio_queue_status_by_name(queue_name) do
-    %{"queues" => queues} = TwilioApi.read_multiple_queue_resources()
-
-    Enum.find(queues, fn queue -> queue["friendly_name"] == queue_name end)
+    with %{"queues" => queues} <- TwilioApi.read_multiple_queue_resources() do
+      Enum.find(queues, fn queue -> queue["friendly_name"] == queue_name end)
+    else
+      %{"status" => 401} -> %{"friendly_name" => "support", "current_size" => 0}
+    end
   end
 end

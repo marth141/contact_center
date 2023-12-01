@@ -9,7 +9,8 @@ import Config
 
 config :contact_center,
   ecto_repos: [ContactCenter.Repo],
-  generators: [timestamp_type: :utc_datetime]
+  generators: [timestamp_type: :utc_datetime],
+  env: Mix.env()
 
 # Configures the endpoint
 config :contact_center, ContactCenterWeb.Endpoint,
