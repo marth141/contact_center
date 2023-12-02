@@ -11,6 +11,7 @@ This project is my attempt to make a better contact center phone utilizing Twili
 - [ ] SMS capability
 - [ ] Contact Database ready
 - [ ] Can contact contacts from a contact list
+- [ ] Maybe add oban for handling webhook matters
 
 # Running
 - Make sure you have Twilio Keys

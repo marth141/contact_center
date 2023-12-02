@@ -5,6 +5,7 @@ defmodule Phone do
   Like an IVR module or something.
   """
   import ExTwiml
+  alias Phoenix.PubSub
 
   @doc """
   your ngrok link. Great while testing!
@@ -220,5 +221,20 @@ defmodule Phone do
     else
       %{"status" => 401} -> %{"friendly_name" => "support", "current_size" => 0}
     end
+  end
+
+  @doc """
+  Subscribes to a pubsub about a twilio queue
+  """
+  def subscribe_to_queue(queue_name) do
+    PubSub.subscribe(ContactCenter.PubSub, queue_topic(queue_name))
+  end
+
+  def queue_topic(queue_name) do
+    "queue_#{queue_name}"
+  end
+
+  def publish_about_queue(queue_name, message) do
+    PubSub.broadcast(ContactCenter.PubSub, queue_topic(queue_name), message)
   end
 end

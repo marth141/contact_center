@@ -1,11 +1,11 @@
 <div class="flex flex-row justify-center">
   <.dialer_form number={@number} dialer_token={@dialer_token} buttons={@buttons} queue_token={@queue_token} queue={@queue} queue_status={@queue_status} />
 </div>
-<div class="flex flex-row my-4 justify-center items-center p-2">
-  <i class="hero-arrow-up-right w-4 mr-2 text-green-500" />
-  <i class="hero-arrow-down-left w-4 mr-8 text-red-500" />
-  <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="mr-8">Call from +18013589504 at <%= ~D[2023-01-01] %></a>
-</div>
+<ul class="overflow-y-auto max-w-100 space-y-4 mt-4">
+  <%= for call_log <- @call_logs do %>
+    <.call_log_item call_log={call_log} />
+  <% end %>
+</ul>
 <script>
   new AudioContext().suspend()
 </script>
