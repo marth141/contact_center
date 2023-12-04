@@ -1,11 +1,15 @@
-<div class="flex flex-row justify-center">
+<div class="flex flex-row ml-4">
+  <ul class="overflow-y-auto max-h-96 space-y-4 mt-4 mr-8">
+    <%= for call_log <- @call_logs do %>
+      <.call_log_item call_log={call_log} />
+    <% end %>
+  </ul>
   <.dialer_form number={@number} dialer_token={@dialer_token} buttons={@buttons} queue_token={@queue_token} queue={@queue} queue_status={@queue_status} />
 </div>
-<ul class="overflow-y-auto max-w-100 space-y-4 mt-4">
-  <%= for call_log <- @call_logs do %>
-    <.call_log_item call_log={call_log} />
-  <% end %>
-</ul>
+<div class="flex flex-row justify-between">
+  <i class="p-4 bg-black"/>
+  <i class="p-4 bg-black"/>
+</div>
 <script>
   new AudioContext().suspend()
 </script>

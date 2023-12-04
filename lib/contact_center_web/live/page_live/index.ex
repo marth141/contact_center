@@ -69,7 +69,7 @@ defmodule ContactCenterWeb.PageLive.Index do
       "inbound" ->
         ~H"""
         <li class="bg-gray-100 rounded-lg shadow-sm p-2 px-4 flex items-center space-x-2 justify-between" id={@call_log.sid}>
-          <i class="hero-phone-arrow-down-left text-green-500" />
+          <i class="hero-phone-arrow-down-left text-gray-700" />
           <p>from: <%= @call_log.from %></p>
           <p>to: <%= @call_log.to %></p>
           <p>direction: <%= @call_log.direction %></p>
@@ -78,7 +78,7 @@ defmodule ContactCenterWeb.PageLive.Index do
       "outbound-dial" ->
         ~H"""
         <li class="bg-gray-100 rounded-lg shadow-sm p-2 px-4 flex items-center space-x-2 justify-between" id={@call_log.sid}>
-          <i class="hero-phone-arrow-up-right text-red-500" />
+          <i class="hero-phone-arrow-up-right text-gray-700" />
           <p>from: <%= @call_log.from %></p>
           <p>to: <%= @call_log.to %></p>
           <p>direction: <%= @call_log.direction %></p>
